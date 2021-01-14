@@ -1,0 +1,25 @@
+{
+  "easypayApp": {
+    "index": {
+      "home": {
+        "title": "Indices",
+        "createLabel": "Create a new Index",
+        "createOrEditLabel": "Create or edit a Index",
+        "notFound": "No Indices found"
+      },
+      "created": "A new Index is created with identifier {{ param }}",
+      "updated": "A Index is updated with identifier {{ param }}",
+      "deleted": "A Index is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Index {{ id }}?"
+      },
+      "detail": {
+        "title": "Index"
+      },
+      "value": "Value",
+      "month": "Month",
+      "year": "Year",
+      "location": "Location"
+    }
+  }
+}

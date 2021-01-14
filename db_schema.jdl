@@ -1,0 +1,81 @@
+entity Client {
+	id Long,
+	email String required,
+    password String required,
+    firstName String required,
+    lastName String required,
+    phoneNumber String
+} 
+
+entity Location {
+	id Long,
+	streetAddress String required,
+	postalCode String required,
+	city String required
+}
+
+entity Index {
+	id Long,
+	value Long required,
+    month Long required,
+    year Long required
+}
+
+entity Shop {
+	id Long,
+	streetAddress String required,
+    phoneNumber String required,
+    weekHourStart Long required,
+    weekHourEnd Long required,
+    weekendHourStart Long required,
+    weekendHourEnd Long required,
+}
+
+entity Bill {
+	id Long,
+    firstDay Instant required,
+    lastDay Instant required,
+    value Long required,
+    paid Boolean
+}
+
+entity Payment {
+	id Long,
+	day Instant required
+}
+
+relationship ManyToOne {
+	Location{client} to Client,
+    Index{location} to Location,
+    Bill{location} to Location
+}
+
+relationship OneToOne {
+	Payment{bill} to Bill
+    Payment{shop} to Shop
+}
+
+// Set pagination options
+paginate * with pagination
+
+// Set filter
+filter all
+
+// Use Data Transfer Objects (DTO)
+dto all with mapstruct
+
+// Service
+service all with serviceClass
+
+application {
+	config {
+    		baseName easypay
+        	buildTool gradle
+        	devDatabaseType postgresql
+        	prodDatabaseType postgresql
+        	languages [en]
+        	packageName com.easypay
+       		serverPort 5001
+    	}
+	entities *
+}
