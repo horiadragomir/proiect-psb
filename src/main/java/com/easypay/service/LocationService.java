@@ -1,5 +1,6 @@
 package com.easypay.service;
 
+import com.easypay.domain.Client;
 import com.easypay.domain.Location;
 import com.easypay.repository.LocationRepository;
 import com.easypay.service.dto.LocationDTO;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -80,5 +82,11 @@ public class LocationService {
     public void delete(Long id) {
         log.debug("Request to delete Location : {}", id);
         locationRepository.deleteById(id);
+    }
+
+    public List<Location> findAllByClientId(Client client) {
+
+        return locationRepository.findAllByClient(client);
+
     }
 }

@@ -6,6 +6,8 @@ import com.easypay.repository.UserRepository;
 import com.easypay.security.AuthoritiesConstants;
 import com.easypay.service.MailService;
 import org.springframework.data.domain.Sort;
+
+import java.security.Key;
 import java.util.Collections;
 import com.easypay.service.UserService;
 import com.easypay.service.dto.UserDTO;
@@ -17,6 +19,10 @@ import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +35,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.validation.Valid;
+import javax.xml.bind.DatatypeConverter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -74,6 +82,11 @@ public class UserResource {
 
     private final MailService mailService;
 
+
+
+
+
+
     public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
         this.userService = userService;
         this.userRepository = userRepository;
@@ -112,6 +125,7 @@ public class UserResource {
                 .body(newUser);
         }
     }
+
 
     /**
      * {@code PUT /users} : Updates an existing User.

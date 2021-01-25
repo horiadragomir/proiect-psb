@@ -1,6 +1,10 @@
 package com.easypay.web.rest;
 
+import com.easypay.domain.Client;
+import com.easypay.domain.Location;
+import com.easypay.service.ClientService;
 import com.easypay.service.LocationService;
+import com.easypay.service.dto.RequestsJson;
 import com.easypay.web.rest.errors.BadRequestAlertException;
 import com.easypay.service.dto.LocationDTO;
 import com.easypay.service.dto.LocationCriteria;
@@ -44,9 +48,15 @@ public class LocationResource {
 
     private final LocationQueryService locationQueryService;
 
-    public LocationResource(LocationService locationService, LocationQueryService locationQueryService) {
+    private final ClientService clientService;
+
+    public LocationResource(LocationService locationService,
+                            LocationQueryService locationQueryService,
+                            ClientService clientService
+    ) {
         this.locationService = locationService;
         this.locationQueryService = locationQueryService;
+        this.clientService = clientService;
     }
 
     /**
@@ -103,6 +113,18 @@ public class LocationResource {
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
+
+    @PostMapping("/new/locations")
+    public ResponseEntity<List<Location>> locationForUser(
+        @Valid @RequestBody RequestsJson requestsJson) {
+        Client client = clientService.findByEmail(requestsJson.getEmail()).get();
+
+
+
+        return ResponseEntity.ok().body(locationService.findAllByClientId(client));
+    }
+
+
 
     /**
      * {@code GET  /locations/count} : count all the locations.

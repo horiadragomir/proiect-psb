@@ -3,7 +3,10 @@ package com.easypay.service;
 import com.easypay.domain.Client;
 import com.easypay.repository.ClientRepository;
 import com.easypay.service.dto.ClientDTO;
+import com.easypay.service.dto.JwtTokenDTO;
+import com.easypay.service.dto.RegisterDTO;
 import com.easypay.service.mapper.ClientMapper;
+import liquibase.pro.packaged.J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,7 @@ public class ClientService {
         this.clientMapper = clientMapper;
     }
 
+
     /**
      * Save a client.
      *
@@ -43,6 +47,16 @@ public class ClientService {
         Client client = clientMapper.toEntity(clientDTO);
         client = clientRepository.save(client);
         return clientMapper.toDto(client);
+    }
+
+    /**
+     * Save a client.
+     *
+     * @param client the entity to save.
+     * @return the persisted entity.
+     */
+    public void saveAClient(Client client) {
+       clientRepository.save(client);
     }
 
     /**
@@ -80,5 +94,20 @@ public class ClientService {
     public void delete(Long id) {
         log.debug("Request to delete Client : {}", id);
         clientRepository.deleteById(id);
+    }
+
+    public void registerClient(RegisterDTO registerDto) {
+        Client client = new Client();
+        client.setEmail(registerDto.getEmail());
+        client.setFirstName(registerDto.getFirstName());
+        client.setLastName(registerDto.getLastname());
+        client.setPassword(registerDto.getPassword());
+        client.setPhoneNumber(registerDto.getPhoneNumber());
+        clientRepository.save(client);
+    }
+
+    public Optional<Client> findByEmail(String email) {
+
+        return clientRepository.findClientByEmail(email);
     }
 }

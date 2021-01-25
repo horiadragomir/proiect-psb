@@ -68,6 +68,14 @@ public class IndexResource {
             .body(result);
     }
 
+    @PostMapping("/new/indices")
+//    public ResponseEntity<Void> addIndex()
+
+
+    @GetMapping("new/indices")
+
+
+
     /**
      * {@code PUT  /indices} : Updates an existing index.
      *
