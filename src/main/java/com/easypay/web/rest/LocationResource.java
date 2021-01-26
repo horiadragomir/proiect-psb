@@ -186,6 +186,30 @@ public class LocationResource {
 
     }
 
+    @DeleteMapping("/new/locations")
+    public ResponseEntity<LocationDTO> deleteLocation(
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody LocationDTO locationDTO
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Optional<Location> location = locationService.findByClientIdAndStreetAdress(
+            client.get().getId(), locationDTO.getStreetAddress());
+        if(!location.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        locationService.delete(location.get().getId());
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
 
     /**
      * {@code GET  /locations/count} : count all the locations.
