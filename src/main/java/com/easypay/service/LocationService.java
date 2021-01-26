@@ -75,6 +75,17 @@ public class LocationService {
     }
 
     /**
+     * Get one location by clientId.
+     *
+     * @param clientId the id of the entity.
+     * @return the entity.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Location> findByClientIdAndStreetAdress(Long clientId, String streetAdress) {
+        return locationRepository.findByClientIdAndStreetAddress(clientId, streetAdress);
+    }
+
+    /**
      * Delete the location by id.
      *
      * @param id the id of the entity.

@@ -1,5 +1,7 @@
 package com.easypay.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.validation.constraints.*;
 import java.io.Serializable;
 
@@ -7,7 +9,8 @@ import java.io.Serializable;
  * A DTO for the {@link com.easypay.domain.Location} entity.
  */
 public class LocationDTO implements Serializable {
-    
+
+    @JsonIgnore
     private Long id;
 
     @NotNull
@@ -19,9 +22,9 @@ public class LocationDTO implements Serializable {
     @NotNull
     private String city;
 
-
+    @JsonIgnore
     private Long clientId;
-    
+
     public Long getId() {
         return id;
     }

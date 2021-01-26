@@ -4,7 +4,6 @@ import com.easypay.domain.Client;
 import com.easypay.domain.Location;
 import com.easypay.service.ClientService;
 import com.easypay.service.LocationService;
-import com.easypay.service.dto.RequestsJson;
 import com.easypay.web.rest.errors.BadRequestAlertException;
 import com.easypay.service.dto.LocationDTO;
 import com.easypay.service.dto.LocationCriteria;
@@ -17,6 +16,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +81,8 @@ public class LocationResource {
      * {@code POST  /locations} : Create a new location.
      *
      * @param locationDTO the locationDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new locationDTO, or with status {@code 400 (Bad Request)} if the location has already an ID.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new locationDTO, or
+     * with status {@code 400 (Bad Request)} if the location has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/locations")
@@ -92,8 +93,13 @@ public class LocationResource {
         }
         LocationDTO result = locationService.save(locationDTO);
         return ResponseEntity.created(new URI("/api/locations/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+                             .headers(HeaderUtil.createEntityCreationAlert(
+                                 applicationName,
+                                 true,
+                                 ENTITY_NAME,
+                                 result.getId().toString()
+                             ))
+                             .body(result);
     }
 
     /**
@@ -113,8 +119,13 @@ public class LocationResource {
         }
         LocationDTO result = locationService.save(locationDTO);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, locationDTO.getId().toString()))
-            .body(result);
+                             .headers(HeaderUtil.createEntityUpdateAlert(
+                                 applicationName,
+                                 true,
+                                 ENTITY_NAME,
+                                 locationDTO.getId().toString()
+                             ))
+                             .body(result);
     }
 
     /**
@@ -128,12 +139,13 @@ public class LocationResource {
     public ResponseEntity<List<LocationDTO>> getAllLocations(LocationCriteria criteria, Pageable pageable) {
         log.debug("REST request to get Locations by criteria: {}", criteria);
         Page<LocationDTO> page = locationQueryService.findByCriteria(criteria, pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        HttpHeaders headers =
+            PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     @GetMapping("/new/locations")
-    public ResponseEntity<List<Location>> getAllIndexforPerson(
+    public ResponseEntity<List<Location>> getAllLocationsForAPerson(
         @RequestHeader("Authorization") String jwtToken
     ) {
         if (!jwtToken.startsWith("Bearer")) {
@@ -142,13 +154,37 @@ public class LocationResource {
 
         Claims claims = decodeJWT(jwtToken.substring(7));
         Optional<Client> client = clientService.findByEmail(claims.getId());
-        if (!client.isPresent())
+        if (!client.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         List<Location> locations = locationService.findAllByClientId(client.get());
         return ResponseEntity.ok().body(locations);
     }
 
+    @PostMapping("/new/locations")
+    public ResponseEntity<LocationDTO> addLocation(
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody LocationDTO locationDTO
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (locationService.findByClientIdAndStreetAdress(
+            client.get().getId(), locationDTO.getStreetAddress()).isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        locationDTO.setClientId(client.get().getId());
+        locationService.save(locationDTO);
+        return ResponseEntity.ok().body(locationDTO);
+
+    }
 
 
     /**
@@ -167,7 +203,8 @@ public class LocationResource {
      * {@code GET  /locations/:id} : get the "id" location.
      *
      * @param id the id of the locationDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the locationDTO, or with status {@code 404 (Not Found)}.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the locationDTO, or with status
+     * {@code 404 (Not Found)}.
      */
     @GetMapping("/locations/{id}")
     public ResponseEntity<LocationDTO> getLocation(@PathVariable Long id) {
@@ -186,6 +223,11 @@ public class LocationResource {
     public ResponseEntity<Void> deleteLocation(@PathVariable Long id) {
         log.debug("REST request to delete Location : {}", id);
         locationService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(
+            applicationName,
+            true,
+            ENTITY_NAME,
+            id.toString()
+        )).build();
     }
 }
