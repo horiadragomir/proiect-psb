@@ -13,6 +13,8 @@ import com.easypay.service.LocationQueryService;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.xml.bind.DatatypeConverter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -49,6 +52,21 @@ public class LocationResource {
     private final LocationQueryService locationQueryService;
 
     private final ClientService clientService;
+
+    private static String SECRET_KEY =
+        "oeRaYY7Wo24sDqKSX3IM9ASGmdGPmkTd9jo1QTy4b7P9Ze5_9hKolVX8xNrQDcNRfVEdTZNOuOyqEGhXEbdJI" +
+        "-ZQ19k_o9MI0y3eZN2lp9jow55FfXMiINEdt1XR85VipRLSOkT6kSpzs2x-jbLDiz9iFVzkd81YKxMgPA7VfZeQUm4n" +
+        "-mOmnWMaVX30zGFU4L3oPBctYKkl4dYfqYWqRNfrgPJVi5DGFjywgxx0ASEiJHtV72paI3fDR2XwlSkyhhmY-ICjCRmsJN4fX1pdoL8a18" +
+        "-aQrvyu4j0Os6dVPYIoPvvY0SAZtWYKHfM15g7A3HD4cVREf9cUsprCRK93w";
+
+    public static Claims decodeJWT(String jwt) {
+
+        //This line will throw an exception if it is not a signed JWS (as expected)
+        Claims claims = Jwts.parser()
+                            .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
+                            .parseClaimsJws(jwt).getBody();
+        return claims;
+    }
 
     public LocationResource(LocationService locationService,
                             LocationQueryService locationQueryService,
@@ -114,14 +132,21 @@ public class LocationResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    @PostMapping("/new/locations")
-    public ResponseEntity<List<Location>> locationForUser(
-        @Valid @RequestBody RequestsJson requestsJson) {
-        Client client = clientService.findByEmail(requestsJson.getEmail()).get();
+    @GetMapping("/new/locations")
+    public ResponseEntity<List<Location>> getAllIndexforPerson(
+        @RequestHeader("Authorization") String jwtToken
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-
-        return ResponseEntity.ok().body(locationService.findAllByClientId(client));
+        List<Location> locations = locationService.findAllByClientId(client.get());
+        return ResponseEntity.ok().body(locations);
     }
 
 

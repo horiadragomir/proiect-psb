@@ -1,5 +1,6 @@
 package com.easypay.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -36,6 +37,7 @@ public class Location implements Serializable {
     @Column(name = "city", nullable = false)
     private String city;
 
+    @JsonIgnore
     @ManyToOne
     @JsonIgnoreProperties(value = "locations", allowSetters = true)
     private Client client;
