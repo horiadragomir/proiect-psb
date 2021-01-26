@@ -1,5 +1,6 @@
 package com.easypay.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -19,6 +20,7 @@ public class Index implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
@@ -36,6 +38,7 @@ public class Index implements Serializable {
     @Column(name = "year", nullable = false)
     private Long year;
 
+    @JsonIgnore
     @ManyToOne
     @JsonIgnoreProperties(value = "indices", allowSetters = true)
     private Location location;

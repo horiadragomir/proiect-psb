@@ -1,6 +1,7 @@
 package com.easypay.service;
 
 import com.easypay.domain.Index;
+import com.easypay.domain.Location;
 import com.easypay.repository.IndexRepository;
 import com.easypay.service.dto.IndexDTO;
 import com.easypay.service.mapper.IndexMapper;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -57,6 +59,18 @@ public class IndexService {
         return indexRepository.findAll(pageable)
             .map(indexMapper::toDto);
     }
+
+    /**
+     * Get all the indices. by location
+     *
+     * @return the list of entities.
+     */
+    @Transactional(readOnly = true)
+    public List<Index> findAllByLocation(Location location) {
+        log.debug("Request to get all Indices");
+        return indexRepository.findAllByLocation(location);
+    }
+
 
 
     /**

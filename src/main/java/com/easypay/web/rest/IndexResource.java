@@ -1,7 +1,13 @@
 package com.easypay.web.rest;
 
+import com.easypay.domain.Client;
+import com.easypay.domain.Index;
+import com.easypay.domain.Location;
+import com.easypay.service.ClientService;
 import com.easypay.service.IndexService;
-import com.easypay.service.dto.JwtTokenDTO;
+import com.easypay.service.LocationService;
+import com.easypay.service.dto.LocationDTO;
+import com.easypay.service.dto.TransmIndexDTO;
 import com.easypay.web.rest.errors.BadRequestAlertException;
 import com.easypay.service.dto.IndexDTO;
 import com.easypay.service.dto.IndexCriteria;
@@ -48,9 +54,19 @@ public class IndexResource {
 
     private final IndexQueryService indexQueryService;
 
-    public IndexResource(IndexService indexService, IndexQueryService indexQueryService) {
+    private final ClientService clientService;
+
+    private final LocationService locationService;
+
+    public IndexResource(IndexService indexService,
+                         IndexQueryService indexQueryService,
+                         ClientService clientService,
+                         LocationService locationService
+    ) {
         this.indexService = indexService;
         this.indexQueryService = indexQueryService;
+        this.clientService = clientService;
+        this.locationService = locationService;
     }
 
     private static String SECRET_KEY =
@@ -87,19 +103,69 @@ public class IndexResource {
             .body(result);
     }
 
-    @GetMapping("/new/indices")
-    public ResponseEntity<Void> getAllIndexforPerson(
-        @RequestHeader("Authorization") String jwtToken
+//    @GetMapping("/new/indices")
+//    public ResponseEntity<Void> getAllIndexforPerson(
+//        @RequestHeader("Authorization") String jwtToken
+//    ) {
+//        if (!jwtToken.startsWith("Bearer")) {
+//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//        }
+//
+//        Claims claims = decodeJWT(jwtToken.substring(7));
+//        System.out.println(claims.getId());
+//
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+
+    @PostMapping("/new/index")
+    public ResponseEntity<Void> addIndex(
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody TransmIndexDTO transmIndexDTO
     ) {
         if (!jwtToken.startsWith("Bearer")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         Claims claims = decodeJWT(jwtToken.substring(7));
-        System.out.println(claims.getId());
-
-
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Optional<Location> location = locationService.findByClientIdAndStreetAdress(
+            client.get().getId(), transmIndexDTO.getStreetAdress());
+        if (!location.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        IndexDTO indexDTO = new IndexDTO();
+        indexDTO.setLocationId(location.get().getId());
+        indexDTO.setMonth(transmIndexDTO.getMonth());
+        indexDTO.setValue(transmIndexDTO.getValue());
+        indexDTO.setYear(transmIndexDTO.getYear());
+        indexService.save(indexDTO);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/new/istoric")
+    public ResponseEntity<List<Index>> istoricIndex(
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody LocationDTO locationDTO
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Optional<Location> location = locationService.findByClientIdAndStreetAdress(
+            client.get().getId(), locationDTO.getStreetAddress());
+        if (!location.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok().body(indexService.findAllByLocation(location.get()));
     }
 
 
