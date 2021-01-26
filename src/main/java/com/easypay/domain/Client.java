@@ -1,5 +1,6 @@
 package com.easypay.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -18,6 +19,7 @@ public class Client implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
@@ -27,6 +29,7 @@ public class Client implements Serializable {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @JsonIgnore
     @NotNull
     @Column(name = "password", nullable = false)
     private String password;

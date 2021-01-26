@@ -2,6 +2,7 @@ package com.easypay.web.rest;
 
 import com.easypay.domain.Client;
 import com.easypay.service.ClientService;
+import com.easypay.service.dto.ChangePasswordDTO;
 import com.easypay.service.dto.ErrorDTO;
 import com.easypay.service.dto.JwtTokenDTO;
 import com.easypay.service.dto.LoginDTO;
@@ -229,13 +230,42 @@ public class ClientResource {
         return ResponseEntity.ok().body(jwtTokenDTO);
     }
 
+    @PostMapping("/clients/informations")
+    public ResponseEntity<Client> getUserInfo(
+        @RequestHeader("Authorization") String jwtToken
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+
+        return client.map(value -> ResponseEntity.ok().body(value))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    }
+
     @PostMapping("/clients/changePassword")
     public ResponseEntity<Void> changePassword(
-        @Valid @RequestBody RequestsJson requestsJson
-    ) {
-        Client client = clientService.findByEmail(requestsJson.getEmail()).get();
-        client.setPassword(requestsJson.getPassword());
-        clientService.saveAClient(client);
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody ChangePasswordDTO changePasswordDTO
+        ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (!changePasswordDTO.getConfirmPassword().equals(changePasswordDTO.getNewPassword())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        client.get().setPassword(changePasswordDTO.getNewPassword());
+        clientService.saveAClient(client.get());
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
