@@ -209,7 +209,7 @@ public class BillResource {
         return ResponseEntity.ok().body(bills);
     }
 
-    @PutMapping
+    @PutMapping("/new/bill/paybills")
     public ResponseEntity<List<Bill>> payBills(
         @RequestHeader("Authorization") String jwtToken,
         @RequestBody PayBillsDTO payBillsDTO
