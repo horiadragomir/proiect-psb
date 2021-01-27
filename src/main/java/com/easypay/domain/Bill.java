@@ -1,5 +1,6 @@
 package com.easypay.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -20,6 +21,7 @@ public class Bill implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
     @SequenceGenerator(name = "sequenceGenerator")
@@ -40,6 +42,7 @@ public class Bill implements Serializable {
     @Column(name = "paid")
     private Boolean paid;
 
+    @JsonIgnore
     @ManyToOne
     @JsonIgnoreProperties(value = "bills", allowSetters = true)
     private Location location;

@@ -1,9 +1,12 @@
 package com.easypay.service;
 
 import com.easypay.domain.Bill;
+import com.easypay.domain.Location;
 import com.easypay.repository.BillRepository;
 import com.easypay.service.dto.BillDTO;
+import com.easypay.service.dto.LocationDTO;
 import com.easypay.service.mapper.BillMapper;
+import com.easypay.service.mapper.LocationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,9 +31,15 @@ public class BillService {
 
     private final BillMapper billMapper;
 
-    public BillService(BillRepository billRepository, BillMapper billMapper) {
+    private final LocationMapper locationMapper;
+
+    public BillService(BillRepository billRepository,
+                       BillMapper billMapper,
+                       LocationMapper locationMapper
+    ) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
+        this.locationMapper = locationMapper;
     }
 
     /**
@@ -80,5 +90,10 @@ public class BillService {
     public void delete(Long id) {
         log.debug("Request to delete Bill : {}", id);
         billRepository.deleteById(id);
+    }
+
+    public List<Bill> findByLocation(Location location, Boolean paid) {
+
+        return billRepository.findByLocationAndPaid(location, paid);
     }
 }
