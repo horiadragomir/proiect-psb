@@ -96,4 +96,8 @@ public class BillService {
 
         return billRepository.findByLocationAndPaid(location, paid);
     }
+
+    public List<Bill> findAllByLocation(Location location) {
+        return billRepository.findAllByLocation(location);
+    }
 }

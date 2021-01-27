@@ -16,4 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificationExecutor<Bill> {
     List<Bill> findByLocationAndPaid(Location location, Boolean paid);
+
+    List<Bill> findAllByLocation(Location location);
 }

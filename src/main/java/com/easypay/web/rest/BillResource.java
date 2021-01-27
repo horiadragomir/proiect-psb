@@ -6,6 +6,7 @@ import com.easypay.domain.Location;
 import com.easypay.service.BillService;
 import com.easypay.service.ClientService;
 import com.easypay.service.LocationService;
+import com.easypay.service.dto.LocBillsDTO;
 import com.easypay.service.dto.LocationDTO;
 import com.easypay.web.rest.errors.BadRequestAlertException;
 import com.easypay.service.dto.BillDTO;
@@ -179,7 +180,7 @@ public class BillResource {
     @PostMapping("/new/bill")
     public ResponseEntity<List<Bill>> getAllUnpaidBills(
         @RequestHeader("Authorization") String jwtToken,
-        @RequestBody LocationDTO locationDTO
+        @RequestBody LocBillsDTO locBillsDTO
     ) {
         if (!jwtToken.startsWith("Bearer")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -190,17 +191,23 @@ public class BillResource {
         if (!client.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        Optional<Location> location = locationService.findByClientIdAndStreetAdress(client.get().getId(),
-                                                                                    locationDTO.getStreetAddress());
+        Optional<Location> location = locationService.findByClientIdAndStreetAdress(
+            client.get().getId(),
+            locBillsDTO.getStreetAddress()
+        );
         if (!location.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-
-        List<Bill> bills = billService.findByLocation(location.get(), false);
+        if (locBillsDTO.getPaid() != null) {
+            List<Bill> bills = billService.findByLocation(location.get(), locBillsDTO.getPaid());
+            return ResponseEntity.ok().body(bills);
+        }
+        List<Bill> bills = billService.findAllByLocation(location.get());
 
         return ResponseEntity.ok().body(bills);
     }
+
 
     /**
      * {@code DELETE  /bills/:id} : delete the "id" bill.
