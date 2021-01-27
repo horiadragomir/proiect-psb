@@ -230,7 +230,12 @@ public class BillResource {
         if (!location.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        billService.deleteByLocationAndFirstDayAndLastDayAndValue(location.get(), payBillsDTO);
+        Optional<Bill> bill = billService.deleteByLocationAndFirstDayAndLastDayAndValue(location.get(), payBillsDTO);
+        if (!bill.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        bill.get().setPaid(true);
+        billService.saveABill(bill.get());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

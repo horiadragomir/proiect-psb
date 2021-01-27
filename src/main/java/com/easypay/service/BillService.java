@@ -56,6 +56,15 @@ public class BillService {
     }
 
     /**
+     * Save a bill.
+     *
+     * @return the persisted entity.
+     */
+    public void saveABill(Bill bill) {
+        billRepository.save(bill);
+    }
+
+    /**
      * Get all the bills.
      *
      * @param pageable the pagination information.
@@ -65,7 +74,7 @@ public class BillService {
     public Page<BillDTO> findAll(Pageable pageable) {
         log.debug("Request to get all Bills");
         return billRepository.findAll(pageable)
-            .map(billMapper::toDto);
+                             .map(billMapper::toDto);
     }
 
 
@@ -79,7 +88,7 @@ public class BillService {
     public Optional<BillDTO> findOne(Long id) {
         log.debug("Request to get Bill : {}", id);
         return billRepository.findById(id)
-            .map(billMapper::toDto);
+                             .map(billMapper::toDto);
     }
 
     /**
@@ -101,8 +110,10 @@ public class BillService {
         return billRepository.findAllByLocation(location);
     }
 
-    public void deleteByLocationAndFirstDayAndLastDayAndValue(Location location, PayBillsDTO payBillsDTO) {
-        billRepository.deleteByLocationAndFirstDayAndLastDayAndValue(location, payBillsDTO.getFirstDay(), payBillsDTO.getLastDay(),
-                                        payBillsDTO.getValue());
+    public Optional<Bill> deleteByLocationAndFirstDayAndLastDayAndValue(Location location, PayBillsDTO payBillsDTO) {
+        return billRepository.findByLocationAndFirstDayAndLastDayAndValue(location, payBillsDTO.getFirstDay(),
+                                                                          payBillsDTO.getLastDay(),
+                                                                          payBillsDTO.getValue()
+        );
     }
 }
