@@ -4,6 +4,7 @@ import com.easypay.domain.Bill;
 import com.easypay.domain.Location;
 import com.easypay.service.dto.LocationDTO;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.*;
@@ -18,4 +19,6 @@ public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificat
     List<Bill> findByLocationAndPaid(Location location, Boolean paid);
 
     List<Bill> findAllByLocation(Location location);
+
+    void deleteByLocationAndFirstDayAndLastDayAndValue(Location location, Instant firstDay, Instant lastDay, Long value);
 }

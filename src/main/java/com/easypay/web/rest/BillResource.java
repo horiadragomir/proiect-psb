@@ -8,6 +8,7 @@ import com.easypay.service.ClientService;
 import com.easypay.service.LocationService;
 import com.easypay.service.dto.LocBillsDTO;
 import com.easypay.service.dto.LocationDTO;
+import com.easypay.service.dto.PayBillsDTO;
 import com.easypay.web.rest.errors.BadRequestAlertException;
 import com.easypay.service.dto.BillDTO;
 import com.easypay.service.dto.BillCriteria;
@@ -178,7 +179,7 @@ public class BillResource {
     }
 
     @PostMapping("/new/bill")
-    public ResponseEntity<List<Bill>> getAllUnpaidBills(
+    public ResponseEntity<List<Bill>> getAllBills(
         @RequestHeader("Authorization") String jwtToken,
         @RequestBody LocBillsDTO locBillsDTO
     ) {
@@ -206,6 +207,32 @@ public class BillResource {
         List<Bill> bills = billService.findAllByLocation(location.get());
 
         return ResponseEntity.ok().body(bills);
+    }
+
+    @PutMapping
+    public ResponseEntity<List<Bill>> payBills(
+        @RequestHeader("Authorization") String jwtToken,
+        @RequestBody PayBillsDTO payBillsDTO
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Optional<Location> location = locationService.findByClientIdAndStreetAdress(
+            client.get().getId(),
+            payBillsDTO.getStreetAddress()
+        );
+        if (!location.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        billService.deleteByLocationAndFirstDayAndLastDayAndValue(location.get(), payBillsDTO);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

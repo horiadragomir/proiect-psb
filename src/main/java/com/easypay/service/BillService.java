@@ -4,7 +4,7 @@ import com.easypay.domain.Bill;
 import com.easypay.domain.Location;
 import com.easypay.repository.BillRepository;
 import com.easypay.service.dto.BillDTO;
-import com.easypay.service.dto.LocationDTO;
+import com.easypay.service.dto.PayBillsDTO;
 import com.easypay.service.mapper.BillMapper;
 import com.easypay.service.mapper.LocationMapper;
 import org.slf4j.Logger;
@@ -99,5 +99,10 @@ public class BillService {
 
     public List<Bill> findAllByLocation(Location location) {
         return billRepository.findAllByLocation(location);
+    }
+
+    public void deleteByLocationAndFirstDayAndLastDayAndValue(Location location, PayBillsDTO payBillsDTO) {
+        billRepository.deleteByLocationAndFirstDayAndLastDayAndValue(location, payBillsDTO.getFirstDay(), payBillsDTO.getLastDay(),
+                                        payBillsDTO.getValue());
     }
 }

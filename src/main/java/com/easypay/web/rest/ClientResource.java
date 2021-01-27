@@ -245,6 +245,23 @@ public class ClientResource {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
+    @PostMapping("/clients/deleteAccount")
+    public ResponseEntity<Void> deleteAccount(
+        @RequestHeader("Authorization") String jwtToken
+    ) {
+        if (!jwtToken.startsWith("Bearer")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Claims claims = decodeJWT(jwtToken.substring(7));
+        Optional<Client> client = clientService.findByEmail(claims.getId());
+        if (!client.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        clientService.delete(client.get().getId());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/clients/changePassword")
     public ResponseEntity<Void> changePassword(
         @RequestHeader("Authorization") String jwtToken,
