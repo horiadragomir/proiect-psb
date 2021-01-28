@@ -111,7 +111,7 @@ public class BillService {
     }
 
     public Optional<Bill> deleteByLocationAndFirstDayAndLastDayAndValue(Location location, PayBillsDTO payBillsDTO) {
-        return billRepository.findByLocationAndFirstDayAndLastDayAndValue(location, payBillsDTO.getFirstDay(),
+        return billRepository.findByFirstDayAndLastDayAndValue(payBillsDTO.getFirstDay(),
                                                                           payBillsDTO.getLastDay(),
                                                                           payBillsDTO.getValue()
         );

@@ -23,4 +23,7 @@ public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificat
 
     Optional<Bill> findByLocationAndFirstDayAndLastDayAndValue(Location location, Instant firstDay, Instant lastDay,
                                                                Long value);
+
+    Optional<Bill> findByFirstDayAndLastDayAndValue(Instant firstDay, Instant lastDay,
+                                                               Long value);
 }
